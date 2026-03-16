@@ -1,6 +1,6 @@
 'use client'
 import { createClient } from '@supabase/supabase-js'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 const supabase = createClient('https://kulvmhryytbvbjsrqovu.supabase.co', 'sb_publishable_5hwCf4OLBd_0PjAJuMu0fg_aMQd2bob')
 
 function Livros() {
@@ -19,13 +19,18 @@ function Livros() {
         alteraLivros(data)        
     }
 
-    async function salvar(e){
-        e.preventDefault()
+    async function salvar(){
 
         const objeto = {
             nome: nome,
             autor: autor,
             preco: preco.replaceAll(",", ".")
+        }
+
+        // Validações
+        if (objeto.nome.length < 3) {
+            alert("Nome do livro inválido")
+            return
         }
 
         const { error } = await supabase
@@ -45,6 +50,11 @@ function Livros() {
         }
 
     }
+
+    // useEffect é chamado apenas ao iniciar a página, uma vez
+    useEffect( ()=>{
+        buscar()    
+    }, [] )
 
     return (
         <div>
@@ -66,13 +76,16 @@ function Livros() {
 
             <hr/>
 
-            <button onClick={buscar} >Carregar livros</button>
-
             <ul>
                 {
-                    livros.map(
-                        item => <li>Título: {item.nome} escrito por {item.autor} por R$ {item.preco}</li>
-                    )
+                    livros.length == 0 ?
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    :
+                        livros.map(
+                            item => <li>Título: {item.nome} escrito por {item.autor} por R$ {item.preco}</li>
+                        )
                 }
             </ul>
 
