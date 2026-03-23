@@ -73,6 +73,14 @@ function Vendas() {
 
     }
 
+    function cancelaEdicao(){
+        alteraEditando(false)
+
+        alteraQuantidade("")
+        alteraPagamento("")
+        alteraObservacao("")
+    }
+
     function formataData(data){
         let data_formatada = new Date(data)
         data_formatada = data_formatada.toLocaleDateString()
@@ -185,12 +193,17 @@ function Vendas() {
     return (
         <div>
 
+            {/* https://wa.me/5517991733578 */}
+            <a href="https://api.whatsapp.com/?phone=5517991733578&text=Olá! Vim pelo site e gostaria de saber sobre o produto X" >
+                <img class="zipzop" src="https://store-images.s-microsoft.com/image/apps.8453.13655054093851568.4a371b72-2ce8-4bdb-9d83-be49894d3fa0.7f3687b9-847d-4f86-bb5c-c73259e2b38e" />
+            </a>
+
             <h1>Vendas</h1>
             <hr />
 
             <form onSubmit={salvar} >
                 <p>Selecione o usuário</p>
-                <select onChange={ e => alteraUsuario(e.target.value) } >
+                <select disabled={editando} onChange={ e => alteraUsuario(e.target.value) } >
                     <option>Selecione...</option>
                 {
                     listaUsuarios.map(
@@ -201,7 +214,7 @@ function Vendas() {
 
                 <br/>
                 <p>Digite o livro</p>
-                <select onChange={ e => alteraLivro(e.target.value) } >
+                <select disabled={editando}  onChange={ e => alteraLivro(e.target.value) } >
                     <option>Selecione...</option>
                     {
                         listaLivros.map(
@@ -226,7 +239,7 @@ function Vendas() {
                     editando == true ?
                         <div>
                             <button>Atualizar</button>
-                            <button>Cancelar</button>
+                            <button onClick={ ()=> cancelaEdicao() } >Cancelar</button>
                         </div>
                     :
                         <button>Salvar</button>

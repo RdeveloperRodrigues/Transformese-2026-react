@@ -7,3 +7,10 @@ table tr:hover{
     cursor: pointer;
     
 }
+
+.zipzop{
+    width: 85px;
+    position: fixed;
+    right: 50px;
+    bottom: 50px;
+}
