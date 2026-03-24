@@ -5,32 +5,32 @@ import "./vendas.css"
 
 function Vendas() {
 
-    const [ usuario, alteraUsuario ] = useState()
-    const [ livro, alteraLivro ] = useState()
-    const [ quantidade, alteraQuantidade ] = useState()
-    const [ pagamento, alteraPagamento ] = useState()
-    const [ observacao, alteraObservacao ] = useState()
+    const [usuario, alteraUsuario] = useState()
+    const [livro, alteraLivro] = useState()
+    const [quantidade, alteraQuantidade] = useState()
+    const [pagamento, alteraPagamento] = useState()
+    const [observacao, alteraObservacao] = useState()
 
-    const [ editando, alteraEditando ] = useState(false)
+    const [editando, alteraEditando] = useState(null)
 
     const [listaVendas, alteraListaVendas] = useState([])
     const [listaUsuarios, alteraListaUsuarios] = useState([])
     const [listaLivros, alteraListaLivros] = useState([])
 
-    const [ inputPesquisaPagamento, alteraInputPesquisaPagamento ] = useState()
-    const [ inputPesquisaObservacao, alteraInputPesquisaObservacao ] = useState()
-    const [ inputPesquisaData, alteraInputPesquisaData ] = useState()
-    const [ inputPesquisaIdUsuario, alteraInputPesquisaIdUsuario ] = useState()
-    const [ inputPesquisaIdProduto, alteraInputPesquisaIdProduto ] = useState()
+    const [inputPesquisaPagamento, alteraInputPesquisaPagamento] = useState()
+    const [inputPesquisaObservacao, alteraInputPesquisaObservacao] = useState()
+    const [inputPesquisaData, alteraInputPesquisaData] = useState()
+    const [inputPesquisaIdUsuario, alteraInputPesquisaIdUsuario] = useState()
+    const [inputPesquisaIdProduto, alteraInputPesquisaIdProduto] = useState()
 
-    async function buscaLivros(){
+    async function buscaLivros() {
         const { data, error } = await supabase
             .from('livros')
             .select()
         alteraListaLivros(data)
     }
 
-    async function buscaUsuarios(){
+    async function buscaUsuarios() {
         const { data, error } = await supabase
             .from('usuarios')
             .select()
@@ -53,9 +53,9 @@ function Vendas() {
 
     }
 
-    async function excluir(id){
+    async function excluir(id) {
         const opcao = confirm("Tem certeza que deseja excluir?")
-        if(opcao == false){
+        if (opcao == false) {
             return
         }
 
@@ -63,9 +63,9 @@ function Vendas() {
 
     }
 
-    function editar(objeto){
+    function editar(objeto) {
 
-        alteraEditando(true)
+        alteraEditando(objeto.id)
 
         alteraQuantidade(objeto.quantidade)
         alteraPagamento(objeto.pagamento)
@@ -73,47 +73,70 @@ function Vendas() {
 
     }
 
-    function cancelaEdicao(){
-        alteraEditando(false)
+    function cancelaEdicao() {
+        alteraEditando(null)
 
         alteraQuantidade("")
         alteraPagamento("")
         alteraObservacao("")
     }
 
-    function formataData(data){
+    async function atualizar() {
+
+           const obj = {
+            quantidade: quantidade,
+            pagamento: pagamento,
+            observacao: observacao
+        }
+        const { error } = await supabase
+            .from('vendas')
+            .update(obj)
+            .eq('id', editando)
+
+            if(error == null){
+                alert("atualização realizada com sucesso!")
+            }else{
+                alert("Dados invalidos.. verifique os dados e tente novamente")
+                cancelaEdicao()
+                buscaTodos()
+            }
+
+            
+    }
+
+    function formataData(data) {
         let data_formatada = new Date(data)
         data_formatada = data_formatada.toLocaleDateString()
         return data_formatada
     }
 
-    function formataHoras(horas){
+    function formataHoras(horas) {
         let horas_formatadas = new Date(horas)
         horas_formatadas = horas_formatadas.toLocaleTimeString()
         return horas_formatadas
     }
 
-    function formataPagamento(pagamento){
-        
-        if(pagamento == "pix"){
+    function formataPagamento(pagamento) {
+
+        if (pagamento == "pix") {
             return <span class="badge text-bg-primary">PIX</span>
         }
 
-        if(pagamento == "cartao_credito"){
+        if (pagamento == "cartao_credito") {
             return <span class="badge text-bg-success">Crédito</span>
         }
 
-        if(pagamento == "boleto"){
+        if (pagamento == "boleto") {
             return <span class="badge text-bg-secondary">Boleto</span>
         }
 
-        if(pagamento == "debito"){
+        if (pagamento == "cartao_debito") {
             return <span class="badge text-bg-warning">Débito</span>
         }
 
     }
 
-    async function salvar(e){
+    async function salvar(e) {
         e.preventDefault()
 
         const obj = {
@@ -133,7 +156,7 @@ function Vendas() {
 
 
     // Funções de pesquisa
-    async function pesquisaPagamento(){
+    async function pesquisaPagamento() {
         const { data, error } = await supabase
             .from('vendas')
             .select('*, id_usuario(*), id_livro(*)')
@@ -142,30 +165,30 @@ function Vendas() {
         alteraListaVendas(data)
 
     }
-    async function pesquisaObservacao(){
+    async function pesquisaObservacao() {
         const { data, error } = await supabase
             .from('vendas')
             .select('*, id_usuario(*), id_livro(*)')
-            .ilike('observacao', '%' + inputPesquisaObservacao + '%' )
+            .ilike('observacao', '%' + inputPesquisaObservacao + '%')
 
         alteraListaVendas(data)
     }
-    async function pesquisaData(){
+    async function pesquisaData() {
         const { data, error } = await supabase
             .from('vendas')
             .select('*, id_usuario(*), id_livro(*)')
-            .gt('created_at', inputPesquisaData+" 00:00:00+00")
-            .lt('created_at', inputPesquisaData+" 23:59:00+00")
+            .gt('created_at', inputPesquisaData + " 00:00:00+00")
+            .lt('created_at', inputPesquisaData + " 23:59:00+00")
 
         alteraListaVendas(data)
     }
-    async function pesquisaIdUsuario(){
-        
+    async function pesquisaIdUsuario() {
+
     }
-    async function pesquisaIdProduto(){
-        
+    async function pesquisaIdProduto() {
+
     }
-    async function pesquisaMaiorVenda(){
+    async function pesquisaMaiorVenda() {
         const { data, error } = await supabase
             .from('vendas')
             .select('*, id_usuario(*), id_livro(*)')
@@ -173,19 +196,19 @@ function Vendas() {
             .limit(1)
         alteraListaVendas(data)
     }
-    async function pesquisaVendasHoje(){
+    async function pesquisaVendasHoje() {
         const { data, error } = await supabase
             .from('vendas')
             .select('*, id_usuario(*), id_livro(*)')
-            .gt('created_at', new Date().toISOString().split("T")[0] +" 00:00:00+00")
-            .lt('created_at', new Date().toISOString().split("T")[0] +" 23:5:00+00")
+            .gt('created_at', new Date().toISOString().split("T")[0] + " 00:00:00+00")
+            .lt('created_at', new Date().toISOString().split("T")[0] + " 23:5:00+00")
 
         alteraListaVendas(data)
     }
 
 
     useEffect(() => {
-        buscaTodos() 
+        buscaTodos()
         buscaUsuarios()
         buscaLivros()
     }, [])
@@ -203,18 +226,18 @@ function Vendas() {
 
             <form onSubmit={salvar} >
                 <p>Selecione o usuário</p>
-                <select disabled={editando} onChange={ e => alteraUsuario(e.target.value) } >
+                <select disabled={editando != null} onChange={e => alteraUsuario(e.target.value)} >
                     <option>Selecione...</option>
-                {
-                    listaUsuarios.map(
-                        item => <option value={item.id} > {item.nome} </option>
-                    )
-                }
+                    {
+                        listaUsuarios.map(
+                            item => <option value={item.id} > {item.nome} </option>
+                        )
+                    }
                 </select>
 
-                <br/>
+                <br />
                 <p>Digite o livro</p>
-                <select disabled={editando}  onChange={ e => alteraLivro(e.target.value) } >
+                <select disabled={editando != null} onChange={e => alteraLivro(e.target.value)} >
                     <option>Selecione...</option>
                     {
                         listaLivros.map(
@@ -223,42 +246,42 @@ function Vendas() {
                     }
                 </select>
 
-                <br/>
+                <br />
                 <p>Digite a quantidade</p>
-                <input value={quantidade} onChange={ e => alteraQuantidade(e.target.value) } />
-                <br/>
+                <input value={quantidade} onChange={e => alteraQuantidade(e.target.value)} />
+                <br />
                 <p>Forma de pagamento</p>
-                <input value={pagamento} onChange={ e => alteraPagamento(e.target.value) } />
-                <br/>
+                <input value={pagamento} onChange={e => alteraPagamento(e.target.value)} />
+                <br />
                 <p>Digite uma observação</p>
-                <input value={observacao} onChange={ e => alteraObservacao(e.target.value) } />
-                <br/>
-                <br/>
-                
+                <input value={observacao} onChange={e => alteraObservacao(e.target.value)} />
+                <br />
+                <br />
+
                 {
-                    editando == true ?
+                    editando != null ?
                         <div>
-                            <button>Atualizar</button>
-                            <button onClick={ ()=> cancelaEdicao() } >Cancelar</button>
+                            <button onClick={()=> atualizar()}>Atualizar</button>
+                            <button onClick={() => cancelaEdicao()} >Cancelar</button>
                         </div>
-                    :
+                        :
                         <button>Salvar</button>
                 }
 
             </form>
 
-            <hr/>
+            <hr />
 
-                <h2> Filtros </h2>
-                <p> Pesquisar pagamento <input onChange={ e => alteraInputPesquisaPagamento(e.target.value) } /> <button onClick={pesquisaPagamento}>Pesquisar</button> </p>
-                <p> Pesquisar observacao <input onChange={ e => alteraInputPesquisaObservacao(e.target.value) } /> <button onClick={pesquisaObservacao}>Pesquisar</button> </p>
-                <p> Pesquisar data <input type="date" onChange={ e => alteraInputPesquisaData(e.target.value) } /> <button onClick={pesquisaData}>Pesquisar</button> </p>
-                <p> Pesquisar pelo ID do usuario <input onChange={ e => alteraInputPesquisaIdUsuario(e.target.value) } /> <button onClick={pesquisaIdUsuario}>Pesquisar</button> </p>
-                <p> Pesquisar pelo ID do produto <input onChange={ e => alteraInputPesquisaIdProduto(e.target.value) } /> <button onClick={pesquisaIdProduto}>Pesquisar</button> </p>
-                <p> Filtrar por maiores vendas <button onClick={pesquisaMaiorVenda}>Pesquisar</button> </p>
-                <p> Ver vendas de hoje <button onClick={pesquisaVendasHoje}>Pesquisar</button> </p>
+            <h2> Filtros </h2>
+            <p> Pesquisar pagamento <input onChange={e => alteraInputPesquisaPagamento(e.target.value)} /> <button onClick={pesquisaPagamento}>Pesquisar</button> </p>
+            <p> Pesquisar observacao <input onChange={e => alteraInputPesquisaObservacao(e.target.value)} /> <button onClick={pesquisaObservacao}>Pesquisar</button> </p>
+            <p> Pesquisar data <input type="date" onChange={e => alteraInputPesquisaData(e.target.value)} /> <button onClick={pesquisaData}>Pesquisar</button> </p>
+            <p> Pesquisar pelo ID do usuario <input onChange={e => alteraInputPesquisaIdUsuario(e.target.value)} /> <button onClick={pesquisaIdUsuario}>Pesquisar</button> </p>
+            <p> Pesquisar pelo ID do produto <input onChange={e => alteraInputPesquisaIdProduto(e.target.value)} /> <button onClick={pesquisaIdProduto}>Pesquisar</button> </p>
+            <p> Filtrar por maiores vendas <button onClick={pesquisaMaiorVenda}>Pesquisar</button> </p>
+            <p> Ver vendas de hoje <button onClick={pesquisaVendasHoje}>Pesquisar</button> </p>
 
-            <hr/>
+            <hr />
 
             <table class="table">
                 <tr>
@@ -277,15 +300,15 @@ function Vendas() {
                         :
                         listaVendas.map(
                             (item, indice) => <tr>
-                                        <td> {indice + 1} </td>
-                                        <td> {item.id_usuario.nome} </td>
-                                        <td> {item.id_livro.nome} </td>
-                                        <td> {item.quantidade} </td>
-                                        <td> { formataPagamento(item.pagamento) } </td>
-                                        <td> { formataData(item.created_at) } às { formataHoras(item.created_at) } </td>
-                                        <td> {item.observacao} </td>
-                                        <td> <button onClick={ ()=> location.href="/vendas/"+item.id } >Ver</button> <button onClick={ ()=> editar(item) } >Editar</button> <button onClick={ ()=> excluir(item.id) } >Excluir</button> </td>
-                                    </tr>
+                                <td> {indice + 1} </td>
+                                <td> {item.id_usuario.nome} </td>
+                                <td> {item.id_livro.nome} </td>
+                                <td> {item.quantidade} </td>
+                                <td> {formataPagamento(item.pagamento)} </td>
+                                <td> {formataData(item.created_at)} às {formataHoras(item.created_at)} </td>
+                                <td> {item.observacao} </td>
+                                <td> <button onClick={() => location.href = "/vendas/" + item.id} >Ver</button> <button onClick={() => editar(item)} >Editar</button> <button onClick={() => excluir(item.id)} >Excluir</button> </td>
+                            </tr>
                         )
                 }
             </table>
@@ -297,7 +320,7 @@ function Vendas() {
 
 
 
-<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+            <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
         </div>
     );
 }
